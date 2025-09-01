@@ -2,13 +2,12 @@
 
 #include "vk/core/device.hpp"
 
+#include <optional>
 #include <vulkan/vulkan_core.h>
 
 #include <memory>
 
 namespace VK::Core {
-
-    // TODO: Refactoring
 
     ///
     /// C++ wrapper class for a Vulkan image.
@@ -26,44 +25,16 @@ namespace VK::Core {
         /// @param extent Extent of the image in pixels.
         /// @param format Vulkan format of the image
         /// @param usage Usage flags for the image
-        /// @param aspectFlags Aspect flags for the image view
+        /// @param importFd Optional file descriptor for shared memory.
+        /// @param exportFd Optional pointer to an integer where the file descriptor will be stored.
         ///
         /// @throws VK::vulkan_error if object creation fails.
         ///
         Image(const Device& device, VkExtent2D extent,
             VkFormat format = VK_FORMAT_R8G8B8A8_UNORM,
             VkImageUsageFlags usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT); // TODO: get rid
-
-        ///
-        /// Create the image with shared backing memory.
-        ///
-        /// @param device Vulkan device
-        /// @param extent Extent of the image in pixels.
-        /// @param format Vulkan format of the image
-        /// @param usage Usage flags for the image
-        /// @param aspectFlags Aspect flags for the image view
-        /// @param fd File descriptor for shared memory.
-        ///
-        /// @throws VK::vulkan_error if object creation fails.
-        ///
-        Image(const Device& device, VkExtent2D extent, VkFormat format,
-            VkImageUsageFlags usage, VkImageAspectFlags aspectFlags, int fd);
-
-        ///
-        /// Create the image and export the backing fd
-        ///
-        /// @param device Vulkan device
-        /// @param extent Extent of the image in pixels.
-        /// @param format Vulkan format of the image
-        /// @param usage Usage flags for the image
-        /// @param aspectFlags Aspect flags for the image view
-        /// @param fd Pointer to an integer where the file descriptor will be stored.
-        ///
-        /// @throws VK::vulkan_error if object creation fails.
-        ///
-        Image(const Device& device, VkExtent2D extent, VkFormat format,
-            VkImageUsageFlags usage, VkImageAspectFlags aspectFlags, int* fd);
+            std::optional<int> importFd = std::nullopt,
+            std::optional<int*> exportFd = std::nullopt);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->image; }
@@ -75,23 +46,13 @@ namespace VK::Core {
         [[nodiscard]] auto getExtent() const { return this->extent; }
         /// Get the format of the image.
         [[nodiscard]] auto getFormat() const { return this->format; }
-        /// Get the aspect flags of the image.
-        [[nodiscard]] auto getAspectFlags() const { return this->aspectFlags; }
-
-        /// Set the layout of the image.
-        void setLayout(VkImageLayout layout) { *this->layout = layout; }
-        /// Get the current layout of the image.
-        [[nodiscard]] VkImageLayout getLayout() const { return *this->layout; }
     private:
         std::shared_ptr<VkImage> image;
         std::shared_ptr<VkDeviceMemory> memory;
         std::shared_ptr<VkImageView> view;
 
-        std::shared_ptr<VkImageLayout> layout;
-
         VkExtent2D extent{};
         VkFormat format{};
-        VkImageAspectFlags aspectFlags{};
     };
 
 }

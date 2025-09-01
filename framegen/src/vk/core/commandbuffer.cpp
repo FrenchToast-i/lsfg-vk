@@ -12,6 +12,7 @@
 
 #include <stdexcept>
 #include <optional>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <vector>
