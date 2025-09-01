@@ -15,7 +15,7 @@ const std::vector<const char*> requiredExtensions = {
 };
 
 Instance::Instance() {
-    volkInitialize(); // FIXME: get rid of volk dependency fully
+    volkInitialize();
 
     // create Vulkan instance
     const VkApplicationInfo appInfo{

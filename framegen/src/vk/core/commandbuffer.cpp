@@ -16,6 +16,7 @@
 #include <optional>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <memory>
 #include <vector>
 
@@ -203,52 +204,59 @@ void CommandBuffer::end() {
     *this->state = CommandBufferState::Full;
 }
 
-void CommandBuffer::submit(VkQueue queue, std::optional<Fence> fence,
-        const std::vector<Semaphore>& waitSemaphores,
-        std::optional<std::vector<uint64_t>> waitSemaphoreValues,
-        const std::vector<Semaphore>& signalSemaphores,
-        std::optional<std::vector<uint64_t>> signalSemaphoreValues) {
+void CommandBuffer::submit(const Device& device, std::optional<Fence> fence,
+        const std::vector<Semaphore>& wait,
+        const std::vector<Semaphore>& signal,
+        const std::vector<std::pair<Semaphore, uint64_t>>& waitTimelines,
+        const std::vector<std::pair<Semaphore, uint64_t>>& signalTimelines) {
     if (*this->state != CommandBufferState::Full)
         throw std::logic_error("Command buffer is not in Full state");
 
+    // create wait semaphores and values
+    std::vector<VkSemaphore> waitSemaphores(waitTimelines.size() + wait.size());
+    std::vector<uint64_t> waitSemaphoreValues(waitTimelines.size() + wait.size());
+    for (const auto& entry : waitTimelines) {
+        waitSemaphores.push_back(entry.first.handle());
+        waitSemaphoreValues.push_back(entry.second);
+    }
+    for (const auto& semaphore : wait)
+        waitSemaphores.push_back(semaphore.handle());
+
+    // create signal semaphores and values
+    std::vector<VkSemaphore> signalSemaphores(signalTimelines.size() + signal.size());
+    std::vector<uint64_t> signalSemaphoreValues(signalTimelines.size() + signal.size());
+    for (const auto& entry : signalTimelines) {
+        signalSemaphores.push_back(entry.first.handle());
+        signalSemaphoreValues.push_back(entry.second);
+    }
+    for (const auto& semaphore : signal)
+        signalSemaphores.push_back(semaphore.handle());
+
+    // submit command buffer
+    const VkTimelineSemaphoreSubmitInfo timelineInfo{
+        .sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO,
+        .waitSemaphoreValueCount = static_cast<uint32_t>(waitSemaphoreValues.size()),
+        .pWaitSemaphoreValues = waitSemaphoreValues.data(),
+        .signalSemaphoreValueCount = static_cast<uint32_t>(signalSemaphoreValues.size()),
+        .pSignalSemaphoreValues = signalSemaphoreValues.data()
+    };
     const std::vector<VkPipelineStageFlags> waitStages(waitSemaphores.size(),
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-    VkTimelineSemaphoreSubmitInfo timelineInfo{
-        .sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO,
-    };
-    if (waitSemaphoreValues.has_value()) {
-        timelineInfo.waitSemaphoreValueCount =
-            static_cast<uint32_t>(waitSemaphoreValues->size());
-        timelineInfo.pWaitSemaphoreValues = waitSemaphoreValues->data();
-    }
-    if (signalSemaphoreValues.has_value()) {
-        timelineInfo.signalSemaphoreValueCount =
-            static_cast<uint32_t>(signalSemaphoreValues->size());
-        timelineInfo.pSignalSemaphoreValues = signalSemaphoreValues->data();
-    }
-
-    std::vector<VkSemaphore> waitSemaphoresHandles;
-    waitSemaphoresHandles.reserve(waitSemaphores.size());
-    for (const auto& semaphore : waitSemaphores)
-        waitSemaphoresHandles.push_back(semaphore.handle());
-    std::vector<VkSemaphore> signalSemaphoresHandles;
-    signalSemaphoresHandles.reserve(signalSemaphores.size());
-    for (const auto& semaphore : signalSemaphores)
-        signalSemaphoresHandles.push_back(semaphore.handle());
-
     const VkSubmitInfo submitInfo{
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .pNext = (waitSemaphoreValues.has_value() || signalSemaphoreValues.has_value())
-            ? &timelineInfo : nullptr,
+        .pNext = waitSemaphores.empty() && signalSemaphores.empty()
+            ? nullptr : &timelineInfo,
         .waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size()),
-        .pWaitSemaphores = waitSemaphoresHandles.data(),
+        .pWaitSemaphores = waitSemaphores.data(),
         .pWaitDstStageMask = waitStages.data(),
         .commandBufferCount = 1,
         .pCommandBuffers = &(*this->commandBuffer),
         .signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size()),
-        .pSignalSemaphores = signalSemaphoresHandles.data()
+        .pSignalSemaphores = signalSemaphores.data()
     };
-    auto res = vkQueueSubmit(queue, 1, &submitInfo, fence ? fence->handle() : VK_NULL_HANDLE);
+    auto res = vkQueueSubmit(device.getComputeQueue(),
+        1, &submitInfo,
+        fence ? fence->handle() : VK_NULL_HANDLE);
     if (res != VK_SUCCESS)
         throw VK::vulkan_error(res, "Unable to submit command buffer");
 

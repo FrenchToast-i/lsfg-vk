@@ -136,26 +136,24 @@ namespace VK::Core {
         ///
         void end();
 
-        // FIXME: Submit logic is kind of janky.
-
         ///
         /// Submit the command buffer to a queue.
         ///
-        /// @param queue Vulkan queue to submit to
-        /// @param fence Optional fence to signal when the command buffer has finished executing
-        /// @param waitSemaphores Semaphores to wait on before executing the command buffer
-        /// @param waitSemaphoreValues Values for the semaphores to wait on
-        /// @param signalSemaphores Semaphores to signal after executing the command buffer
-        /// @param signalSemaphoreValues Values for the semaphores to signal
+        /// @param device Vulkan device
+        /// @param fence Optional fence to signal after execution
+        /// @param wait Semaphores to wait on
+        /// @param signal Semaphores to signal after execution
+        /// @param waitTimelines Timeline semaphores to wait on
+        /// @param signalTimelines Timeline semaphores to signal after execution
         ///
         /// @throws std::logic_error if the command buffer is not in Full state.
         /// @throws VK::vulkan_error if submission fails.
         ///
-        void submit(VkQueue queue, std::optional<Fence> fence,
-            const std::vector<Semaphore>& waitSemaphores = {},
-            std::optional<std::vector<uint64_t>> waitSemaphoreValues = std::nullopt,
-            const std::vector<Semaphore>& signalSemaphores = {},
-            std::optional<std::vector<uint64_t>> signalSemaphoreValues = std::nullopt);
+        void submit(const Device& device, std::optional<Fence> fence,
+            const std::vector<Semaphore>& wait = {},
+            const std::vector<Semaphore>& signal = {},
+            const std::vector<std::pair<Semaphore, uint64_t>>& waitTimelines = {},
+            const std::vector<std::pair<Semaphore, uint64_t>>& signalTimelines = {});
 
         /// Get the state of the command buffer.
         [[nodiscard]] auto getState() const { return *this->state; }

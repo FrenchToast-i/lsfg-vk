@@ -11,8 +11,6 @@
 
 namespace VK::Core {
 
-    // FIXME: More intelligent device choosing method. See #200.
-
     ///
     /// C++ wrapper class for a Vulkan device.
     ///
