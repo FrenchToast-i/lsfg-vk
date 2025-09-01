@@ -15,8 +15,10 @@ project(lsfg-vk-framegen
 
 file(GLOB SOURCES
     "src/vk/core/*.cpp"
+    "src/vk/helper/*.cpp"
     "src/vk/*.cpp"
     "src/*.cpp"
+    "src/thirdparty/*.c"
 )
 
 add_library(lsfg-vk-framegen STATIC ${SOURCES})
@@ -50,8 +52,6 @@ if(LSFGVK_EXCESS_DEBUG)
         -Wno-switch-enum    # ignore missing cases
         -Wno-switch-default # ignore missing default
         -Wno-padded         # ignore automatic padding
-        -Wno-exit-time-destructors # allow globals
-        -Wno-global-constructors   # allow globals
         -Wno-cast-function-type-strict # for vulkan
     )
 

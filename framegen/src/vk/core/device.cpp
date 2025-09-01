@@ -15,7 +15,7 @@
 
 using namespace VK::Core;
 
-const std::vector<const char*> requiredExtensions = {
+const std::array<const char*, 3> requiredExtensions = {
     "VK_KHR_external_memory_fd",
     "VK_KHR_external_semaphore_fd",
     "VK_EXT_robustness2"

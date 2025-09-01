@@ -64,3 +64,32 @@ void Mipmaps::Dispatch(const Core::CommandBuffer& buf, uint64_t frameCount) {
     this->descriptorSets.at(frameCount % 2).bind(buf, this->pipeline);
     buf.dispatch(threadsX, threadsY, 1);
 }
+
+// modern writing style
+
+/*
+Mipmaps::Mipmap(Vulkan& vk, TemporalImage in) : in(in) {
+    const auto flow = Utils::fdiv2D(images[0].getExtent(), vk.flowScale);
+    this->out = MipmappedImage(vk, flow, 7, VK_FORMAT_R8_UNORM);
+    this->buffer = vk.resources.getBuffer(vk.device);
+    this->sampler = vk.resources.getSampler(vk.device);
+    this->shader = ShaderBuilder(vk, "mipmaps")
+        .withBuffer(this->buffer)
+        .withSampler(this->sampler)
+        .withInput(this->in, ShaderBuilder::CURRENT)
+        .withOutput(this->out, ShaderBuilder::MIPMAP_FLAT)
+        .build();
+
+void Mipmaps::prepare(const CommandBuffer& buf) {
+    this->in.prepareAll(buf);
+    this->out.prepareAll(buf);
+}
+
+void Mipmaps::Dispatch() {
+    const auto flow = this->out.getExtent(0);
+    const uint32_t threadsX = (flow.width +  63) >> 6;
+    const uint32_t threadsY = (flow.height + 63) >> 6;
+
+    this->shader.dispatch(buf, threadsX, threadsY);
+}
+*/

@@ -4,15 +4,9 @@
 #include "vk/core/instance.hpp"
 #include "vk/exception.hpp"
 
-#include <cstdint>
 #include <memory>
-#include <vector>
 
 using namespace VK::Core;
-
-const std::vector<const char*> requiredExtensions = {
-    // empty, for now :3
-};
 
 Instance::Instance() {
     volkInitialize();
@@ -28,9 +22,7 @@ Instance::Instance() {
     };
     const VkInstanceCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        .pApplicationInfo = &appInfo,
-        .enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size()),
-        .ppEnabledExtensionNames = requiredExtensions.data()
+        .pApplicationInfo = &appInfo
     };
     VkInstance instanceHandle{};
     auto res = vkCreateInstance(&createInfo, nullptr, &instanceHandle);
