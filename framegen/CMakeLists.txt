@@ -14,22 +14,9 @@ project(lsfg-vk-framegen
     LANGUAGES C CXX)
 
 file(GLOB SOURCES
-    "src/common/*.cpp"
-    "src/config/*.cpp"
-    "src/core/*.cpp"
-    "src/pool/*.cpp"
+    "src/vk/core/*.cpp"
+    "src/vk/*.cpp"
     "src/*.cpp"
-    "v3.1_src/core/*.cpp"
-    "v3.1_src/pool/*.cpp"
-    "v3.1_src/shaders/*.cpp"
-    "v3.1_src/utils/*.cpp"
-    "v3.1_src/*.cpp"
-    "v3.1p_src/core/*.cpp"
-    "v3.1p_src/pool/*.cpp"
-    "v3.1p_src/shaders/*.cpp"
-    "v3.1p_src/utils/*.cpp"
-    "v3.1p_src/*.cpp"
-    "src/thirdparty/*.c"
 )
 
 add_library(lsfg-vk-framegen STATIC ${SOURCES})
@@ -41,10 +28,7 @@ set_target_properties(lsfg-vk-framegen PROPERTIES
 target_include_directories(lsfg-vk-framegen SYSTEM
     PUBLIC include/thirdparty)
 target_include_directories(lsfg-vk-framegen
-    PUBLIC include
-    PUBLIC public
-    PRIVATE v3.1_include
-    PRIVATE v3.1p_include)
+    PUBLIC include)
 
 # diagnostics
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
