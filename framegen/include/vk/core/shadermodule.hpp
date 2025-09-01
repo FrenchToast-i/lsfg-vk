@@ -37,13 +37,6 @@ namespace VK::Core {
         [[nodiscard]] auto handle() const { return *this->shaderModule; }
         /// Get the descriptor set layout.
         [[nodiscard]] auto getLayout() const { return *this->descriptorSetLayout; }
-
-        /// Trivially copyable, moveable and destructible
-        ShaderModule(const ShaderModule&) noexcept = default;
-        ShaderModule& operator=(const ShaderModule&) noexcept = default;
-        ShaderModule(ShaderModule&&) noexcept = default;
-        ShaderModule& operator=(ShaderModule&&) noexcept = default;
-        ~ShaderModule() = default;
     private:
         std::shared_ptr<VkShaderModule> shaderModule;
         std::shared_ptr<VkDescriptorSetLayout> descriptorSetLayout;

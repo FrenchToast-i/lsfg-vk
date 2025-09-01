@@ -32,13 +32,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->sampler; }
-
-        /// Trivially copyable, moveable and destructible
-        Sampler(const Sampler&) noexcept = default;
-        Sampler& operator=(const Sampler&) noexcept = default;
-        Sampler(Sampler&&) noexcept = default;
-        Sampler& operator=(Sampler&&) noexcept = default;
-        ~Sampler() = default;
     private:
         std::shared_ptr<VkSampler> sampler;
     };

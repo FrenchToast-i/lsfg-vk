@@ -125,13 +125,6 @@ namespace VK::Core {
         [[nodiscard]] auto getState() const { return *this->state; }
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->commandBuffer; }
-
-        /// Trivially copyable, moveable and destructible
-        CommandBuffer(const CommandBuffer&) noexcept = default;
-        CommandBuffer& operator=(const CommandBuffer&) noexcept = default;
-        CommandBuffer(CommandBuffer&&) noexcept = default;
-        CommandBuffer& operator=(CommandBuffer&&) noexcept = default;
-        ~CommandBuffer() = default;
     private:
         std::shared_ptr<CommandBufferState> state;
         std::shared_ptr<VkCommandBuffer> commandBuffer;

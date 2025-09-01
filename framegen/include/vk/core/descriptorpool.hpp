@@ -28,13 +28,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->descriptorPool; }
-
-        /// Trivially copyable, moveable and destructible
-        DescriptorPool(const DescriptorPool&) noexcept = default;
-        DescriptorPool& operator=(const DescriptorPool&) noexcept = default;
-        DescriptorPool(DescriptorPool&&) noexcept = default;
-        DescriptorPool& operator=(DescriptorPool&&) noexcept = default;
-        ~DescriptorPool() = default;
     private:
         std::shared_ptr<VkDescriptorPool> descriptorPool;
     };

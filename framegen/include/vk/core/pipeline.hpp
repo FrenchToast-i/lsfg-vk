@@ -32,13 +32,6 @@ namespace VK::Core {
         [[nodiscard]] auto handle() const { return *this->pipeline; }
         /// Get the pipeline layout.
         [[nodiscard]] auto getLayout() const { return *this->layout; }
-
-        /// Trivially copyable, moveable and destructible
-        Pipeline(const Pipeline&) noexcept = default;
-        Pipeline& operator=(const Pipeline&) noexcept = default;
-        Pipeline(Pipeline&&) noexcept = default;
-        Pipeline& operator=(Pipeline&&) noexcept = default;
-        ~Pipeline() = default;
     private:
         std::shared_ptr<VkPipeline> pipeline;
         std::shared_ptr<VkPipelineLayout> layout;

@@ -56,13 +56,6 @@ namespace VK::Core {
         [[nodiscard]] auto getComputeFamilyIdx() const { return this->computeFamilyIdx; }
         /// Check if the device supports FP16.
         [[nodiscard]] auto supportsFP16() const { return this->fp16; }
-
-        // Trivially copyable, moveable and destructible
-        Device(const Device&) noexcept = default;
-        Device& operator=(const Device&) noexcept = default;
-        Device(Device&&) noexcept = default;
-        Device& operator=(Device&&) noexcept = default;
-        ~Device() = default;
     private:
         std::shared_ptr<VkDevice> device;
 

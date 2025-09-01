@@ -28,13 +28,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->commandPool; }
-
-        /// Trivially copyable, moveable and destructible
-        CommandPool(const CommandPool&) noexcept = default;
-        CommandPool& operator=(const CommandPool&) noexcept = default;
-        CommandPool(CommandPool&&) noexcept = default;
-        CommandPool& operator=(CommandPool&&) noexcept = default;
-        ~CommandPool() = default;
     private:
         std::shared_ptr<VkCommandPool> commandPool;
     };

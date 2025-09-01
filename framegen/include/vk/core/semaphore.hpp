@@ -30,13 +30,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->semaphore; }
-
-        // Trivially copyable, moveable and destructible
-        Semaphore(const Semaphore&) noexcept = default;
-        Semaphore& operator=(const Semaphore&) noexcept = default;
-        Semaphore(Semaphore&&) noexcept = default;
-        Semaphore& operator=(Semaphore&&) noexcept = default;
-        ~Semaphore() = default;
     private:
         std::shared_ptr<VkSemaphore> semaphore;
     };

@@ -49,13 +49,6 @@ namespace VK::Core {
         [[nodiscard]] auto getMemory() const { return *this->memory; }
         /// Get the size of the buffer.
         [[nodiscard]] auto getSize() const { return this->size; }
-
-        /// Trivially copyable, moveable and destructible
-        Buffer(const Buffer&) noexcept = default;
-        Buffer& operator=(const Buffer&) noexcept = default;
-        Buffer(Buffer&&) noexcept = default;
-        Buffer& operator=(Buffer&&) noexcept = default;
-        ~Buffer() = default;
     private:
 
         std::shared_ptr<VkBuffer> buffer;

@@ -27,13 +27,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return &this->info; }
-
-        /// Trivially copyable, moveable and destructible
-        ImageInfo(const ImageInfo&) noexcept = default;
-        ImageInfo& operator=(const ImageInfo&) noexcept = default;
-        ImageInfo(ImageInfo&&) noexcept = default;
-        ImageInfo& operator=(ImageInfo&&) noexcept = default;
-        ~ImageInfo() = default;
     private:
         VkDescriptorImageInfo info{};
     };
@@ -48,13 +41,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return &this->info; }
-
-        /// Trivially copyable, moveable and destructible
-        SamplerInfo(const SamplerInfo&) noexcept = default;
-        SamplerInfo& operator=(const SamplerInfo&) noexcept = default;
-        SamplerInfo(SamplerInfo&&) noexcept = default;
-        SamplerInfo& operator=(SamplerInfo&&) noexcept = default;
-        ~SamplerInfo() = default;
     private:
         VkDescriptorImageInfo info{};
     };
@@ -70,13 +56,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return &this->info; }
-
-        /// Trivially copyable, moveable and destructible
-        BufferInfo(const BufferInfo&) noexcept = default;
-        BufferInfo& operator=(const BufferInfo&) noexcept = default;
-        BufferInfo(BufferInfo&&) noexcept = default;
-        BufferInfo& operator=(BufferInfo&&) noexcept = default;
-        ~BufferInfo() = default;
     private:
         VkDescriptorBufferInfo info{};
     };
@@ -108,13 +87,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->descriptorSet; }
-
-        /// Trivially copyable, moveable and destructible
-        DescriptorSet(const DescriptorSet&) noexcept = default;
-        DescriptorSet& operator=(const DescriptorSet&) noexcept = default;
-        DescriptorSet(DescriptorSet&&) noexcept = default;
-        DescriptorSet& operator=(DescriptorSet&&) noexcept = default;
-        ~DescriptorSet() = default;
     private:
         std::shared_ptr<VkDescriptorSet> descriptorSet;
     };

@@ -49,13 +49,6 @@ namespace VK::Core {
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->fence; }
-
-        // Trivially copyable, moveable and destructible
-        Fence(const Fence&) noexcept = default;
-        Fence& operator=(const Fence&) noexcept = default;
-        Fence(Fence&&) noexcept = default;
-        Fence& operator=(Fence&&) noexcept = default;
-        ~Fence() = default;
     private:
         std::shared_ptr<VkFence> fence;
     };

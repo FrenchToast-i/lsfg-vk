@@ -82,13 +82,6 @@ namespace VK::Core {
         void setLayout(VkImageLayout layout) { *this->layout = layout; }
         /// Get the current layout of the image.
         [[nodiscard]] VkImageLayout getLayout() const { return *this->layout; }
-
-        /// Trivially copyable, moveable and destructible
-        Image(const Image&) noexcept = default;
-        Image& operator=(const Image&) noexcept = default;
-        Image(Image&&) noexcept = default;
-        Image& operator=(Image&&) noexcept = default;
-        ~Image() = default;
     private:
         std::shared_ptr<VkImage> image;
         std::shared_ptr<VkDeviceMemory> memory;
