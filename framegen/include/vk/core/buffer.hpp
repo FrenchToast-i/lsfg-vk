@@ -50,7 +50,6 @@ namespace VK::Core {
         /// Get the size of the buffer.
         [[nodiscard]] auto getSize() const { return this->size; }
     private:
-
         std::shared_ptr<VkBuffer> buffer;
         std::shared_ptr<VkDeviceMemory> memory;
 

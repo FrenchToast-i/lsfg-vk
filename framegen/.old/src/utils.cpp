@@ -21,57 +21,6 @@
 using namespace LSFG;
 using namespace LSFG::Utils;
 
-BarrierBuilder& BarrierBuilder::addR2W(Core::Image& image) {
-    this->barriers.emplace_back(VkImageMemoryBarrier2 {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-        .srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-        .srcAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-        .dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT,
-        .oldLayout = image.getLayout(),
-        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-        .image = image.handle(),
-        .subresourceRange = {
-            .aspectMask = image.getAspectFlags(),
-            .levelCount = 1,
-            .layerCount = 1
-        }
-    });
-    image.setLayout(VK_IMAGE_LAYOUT_GENERAL);
-
-    return *this;
-}
-
-BarrierBuilder& BarrierBuilder::addW2R(Core::Image& image) {
-    this->barriers.emplace_back(VkImageMemoryBarrier2 {
-        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-        .srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-        .srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
-        .dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT,
-        .oldLayout = image.getLayout(),
-        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-        .image = image.handle(),
-        .subresourceRange = {
-            .aspectMask = image.getAspectFlags(),
-            .levelCount = 1,
-            .layerCount = 1
-        }
-    });
-    image.setLayout(VK_IMAGE_LAYOUT_GENERAL);
-
-    return *this;
-}
-
-void BarrierBuilder::build() const {
-    const VkDependencyInfo dependencyInfo = {
-        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
-        .imageMemoryBarrierCount = static_cast<uint32_t>(this->barriers.size()),
-        .pImageMemoryBarriers = this->barriers.data()
-    };
-    vkCmdPipelineBarrier2(this->commandBuffer->handle(), &dependencyInfo);
-}
-
 void Utils::uploadImage(const Core::Device& device, const Core::CommandPool& commandPool,
         Core::Image& image, const std::string& path) {
     // read image bytecode

@@ -33,7 +33,7 @@ namespace VK::Core {
         Image(const Device& device, VkExtent2D extent,
             VkFormat format = VK_FORMAT_R8G8B8A8_UNORM,
             VkImageUsageFlags usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT);
+            VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT); // TODO: get rid
 
         ///
         /// Create the image with shared backing memory.

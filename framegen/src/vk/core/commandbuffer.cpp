@@ -2,6 +2,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "vk/core/commandbuffer.hpp"
+#include "vk/core/descriptorset.hpp"
 #include "vk/core/commandpool.hpp"
 #include "vk/core/semaphore.hpp"
 #include "vk/core/pipeline.hpp"
@@ -70,6 +71,79 @@ void CommandBuffer::bindDescriptorSet(const Pipeline& pipeline, const Descriptor
     vkCmdBindDescriptorSets(*this->commandBuffer,
         VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.getLayout(),
         0, 1, &descriptorSetHandle, 0, nullptr);
+}
+
+void CommandBuffer::insertBarrier(
+        const std::vector<VkImage>& images) const {
+    if (*this->state != CommandBufferState::Recording)
+        throw std::logic_error("Command buffer is not in Recording state");
+
+    std::vector<VkImageMemoryBarrier2> barriers(images.size());
+    for (size_t i = 0; i < images.size(); i++) {
+        barriers[i] = {
+            .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+            .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+            .image = images[i],
+            .subresourceRange = {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .levelCount = 1,
+                .layerCount = 1
+            }
+        };
+    }
+
+    const VkDependencyInfo dependencyInfo = {
+        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+        .imageMemoryBarrierCount = static_cast<uint32_t>(barriers.size()),
+        .pImageMemoryBarriers = barriers.data()
+    };
+    vkCmdPipelineBarrier2(*this->commandBuffer, &dependencyInfo);
+}
+
+void CommandBuffer::insertBarrier(
+        const std::vector<VkImage>& readableImages,
+        const std::vector<VkImage>& writableImages) const {
+    if (*this->state != CommandBufferState::Recording)
+        throw std::logic_error("Command buffer is not in Recording state");
+
+    // create barriers
+    const VkImageMemoryBarrier2 dummyBarrier{
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+        .srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+        .subresourceRange = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .levelCount = 1,
+            .layerCount = 1
+        }
+    };
+
+    const size_t totalImages =
+        readableImages.size() + writableImages.size();
+    std::vector<VkImageMemoryBarrier2> barriers(totalImages);
+
+    for (const auto& image : readableImages) {
+        VkImageMemoryBarrier2& barrier = barriers.emplace_back(dummyBarrier);
+        barrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+        barrier.image = image;
+    }
+
+    for (const auto& image : writableImages) {
+        VkImageMemoryBarrier2& barrier = barriers.emplace_back(dummyBarrier);
+        barrier.srcAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
+        barrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
+        barrier.image = image;
+    }
+
+    // insert barriers
+    const VkDependencyInfo dependencyInfo = {
+        .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+        .imageMemoryBarrierCount = static_cast<uint32_t>(barriers.size()),
+        .pImageMemoryBarriers = barriers.data()
+    };
+    vkCmdPipelineBarrier2(*this->commandBuffer, &dependencyInfo);
 }
 
 void CommandBuffer::dispatch(uint32_t x, uint32_t y, uint32_t z) const {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vk/core/commandpool.hpp"
 #include "vk/core/descriptorset.hpp"
+#include "vk/core/commandpool.hpp"
 #include "vk/core/semaphore.hpp"
 #include "vk/core/pipeline.hpp"
 #include "vk/core/device.hpp"
@@ -76,8 +76,27 @@ namespace VK::Core {
         ///
         void bindDescriptorSet(const Pipeline& pipeline, const DescriptorSet& set) const;
 
-        // TODO: Method for inserting a pipeline barrier.
-        //   TODO: Rework abstraction for barriers.
+        ///
+        /// Insert memory barriers transitioning images into the general layout.
+        ///
+        /// @param images Images to transition to general layout
+        ///
+        /// @throws std::logic_error if the command buffer is not in Recording state
+        ///
+        void insertBarrier(const std::vector<VkImage>& images) const;
+
+        ///
+        /// Insert memory barriers for images in the command buffer.
+        ///
+        /// @param readableImages Images that will be transitioned from rw to read-only
+        /// @param writableImages Images that will be transitioned from read-only to rw
+        ///
+        /// @throws std::logic_error if the command buffer is not in Recording state
+        ///
+        void insertBarrier(
+            const std::vector<VkImage>& readableImages,
+            const std::vector<VkImage>& writableImages) const;
+
         // TODO: Method for copying a buffer to an image
         // TODO: Method for clearing an image to a color
 
