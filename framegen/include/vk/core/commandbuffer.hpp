@@ -83,19 +83,19 @@ namespace VK::Core {
         ///
         /// @throws std::logic_error if the command buffer is not in Recording state
         ///
-        void insertBarrier(const std::vector<VkImage>& images) const;
+        void insertBarrier(const std::vector<Core::Image>& images) const;
 
         ///
         /// Insert memory barriers for images in the command buffer.
         ///
-        /// @param readableImages Images that will be transitioned from rw to read-only
-        /// @param writableImages Images that will be transitioned from read-only to rw
+        /// @param sampledImages Images that will be transitioned from rw to read-only
+        /// @param storageImages Images that will be transitioned from read-only to rw
         ///
         /// @throws std::logic_error if the command buffer is not in Recording state
         ///
         void insertBarrier(
-            const std::vector<std::optional<Core::Image>>& readableImages,
-            const std::vector<Core::Image>& writableImages) const;
+            const std::vector<std::optional<Core::Image>>& sampledImages,
+            const std::vector<Core::Image>& storageImages) const;
 
         ///
         /// Copy a buffer to an image.

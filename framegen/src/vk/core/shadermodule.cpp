@@ -34,7 +34,7 @@ ShaderModule::ShaderModule(const Device& device, const std::vector<uint8_t>& cod
     layoutBindings.reserve(buffers + samplers + sampledImages + storageImages);
 
     for (size_t i = 0; i < buffers; i++)
-        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+        layoutBindings.push_back({
             .binding = static_cast<uint32_t>(i),
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
@@ -42,7 +42,7 @@ ShaderModule::ShaderModule(const Device& device, const std::vector<uint8_t>& cod
         });
 
     for (size_t i = 0; i < samplers; i++)
-        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+        layoutBindings.push_back({
             .binding = static_cast<uint32_t>(i + 16),
             .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
             .descriptorCount = 1,
@@ -50,7 +50,7 @@ ShaderModule::ShaderModule(const Device& device, const std::vector<uint8_t>& cod
         });
 
     for (size_t i = 0; i < sampledImages; i++)
-        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+        layoutBindings.push_back({
             .binding = static_cast<uint32_t>(i + 32),
             .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
             .descriptorCount = 1,
@@ -58,7 +58,7 @@ ShaderModule::ShaderModule(const Device& device, const std::vector<uint8_t>& cod
         });
 
     for (size_t i = 0; i < storageImages; i++)
-        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+        layoutBindings.push_back({
             .binding = static_cast<uint32_t>(i + 48),
             .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             .descriptorCount = 1,

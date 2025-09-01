@@ -74,12 +74,12 @@ DescriptorSet::DescriptorSet(const Device& device,
             }))
         });
 
-    size_t inputIdx{32};
+    size_t sampledIdx{32};
     for (const auto& img : sampledImages) {
         entries.push_back({
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = descriptorSetHandle,
-            .dstBinding = static_cast<uint32_t>(inputIdx++),
+            .dstBinding = static_cast<uint32_t>(sampledIdx++),
             .descriptorCount = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
             .pImageInfo = &(imageInfos.emplace_back(VkDescriptorImageInfo{
@@ -90,12 +90,12 @@ DescriptorSet::DescriptorSet(const Device& device,
         });
     }
 
-    size_t outputIdx{48};
+    size_t storageIdx{48};
     for (const auto& img : storageImages)
         entries.push_back({
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = descriptorSetHandle,
-            .dstBinding = static_cast<uint32_t>(outputIdx++),
+            .dstBinding = static_cast<uint32_t>(storageIdx++),
             .descriptorCount = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
             .pImageInfo = &(imageInfos.emplace_back(VkDescriptorImageInfo{

@@ -30,22 +30,22 @@ namespace VK::Helper {
         [[nodiscard]] const auto& all() const { return this->sets; }
 
         /// Get the descriptor set for a specific frame index.
-        [[nodiscard]] const auto& at(size_t index) const {
+        [[nodiscard]] const auto& getSetAt(size_t index) const {
             return this->set(index).sets;
         }
-        /// Get the readable images for a specific frame index.
-        [[nodiscard]] const auto& readablesAt(size_t index) const {
-            return this->set(index).readables;
+        /// Get the sampled images for a specific frame index.
+        [[nodiscard]] const auto& getSampledImagesAt(size_t index) const {
+            return this->set(index).sampled;
         }
-        /// Get the writable images for a specific frame index.
-        [[nodiscard]] const auto& writablesAt(size_t index) const {
-            return this->set(index).writables;
+        /// Get the storage images for a specific frame index.
+        [[nodiscard]] const auto& getStorageImagesAt(size_t index) const {
+            return this->set(index).storage;
         }
     private:
         struct Set {
             Core::DescriptorSet sets;
-            std::vector<std::optional<Core::Image>> readables;
-            std::vector<Core::Image> writables;
+            std::vector<std::optional<Core::Image>> sampled;
+            std::vector<Core::Image> storage;
         };
         std::vector<Set> sets;
 
@@ -87,85 +87,85 @@ namespace VK::Helper {
             return *this;
         }
 
-        /// Add an input image to the descriptor.
-        MultiSetBuilder& addInput(const Core::Image& image) {
+        /// Add a sampled image to the descriptor.
+        MultiSetBuilder& addSampledImage(const Core::Image& image) {
             for (auto& recipe : this->recipes)
-                recipe.inImages.emplace_back(image);
+                recipe.sampled.emplace_back(image);
             return *this;
         }
-        /// Add an optional input image to the descriptor.
-        MultiSetBuilder& addInput(const std::optional<Core::Image>& image) {
+        /// Add an optional sampled image to the descriptor.
+        MultiSetBuilder& addSampledImage(const std::optional<Core::Image>& image) {
             for (auto& recipe : this->recipes)
-                recipe.inImages.emplace_back(image);
+                recipe.sampled.emplace_back(image);
             return *this;
         }
-        /// Add multiple input images to the descriptor.
-        MultiSetBuilder& addInput(const std::vector<Core::Image>& images) {
+        /// Add multiple sampled images to the descriptor.
+        MultiSetBuilder& addSampledImage(const std::vector<Core::Image>& images) {
             for (auto& recipe : this->recipes)
                 for (const auto& img : images)
-                    recipe.inImages.emplace_back(img);
+                    recipe.sampled.emplace_back(img);
             return *this;
         }
 
-        /// Add a temporal input image to the descriptor.
-        MultiSetBuilder& addInput(const TemporalImage& temporalImage, size_t offset = 0) {
+        /// Add a temporal sampled image to the descriptor.
+        MultiSetBuilder& addSampledImage(const TemporalImage& temporalImage, size_t offset = 0) {
             for (auto& recipe : this->recipes)
-                recipe.inImages.emplace_back(temporalImage.at(offset++));
+                recipe.sampled.emplace_back(temporalImage.at(offset++));
             return *this;
         }
 
-        /// Add a group of input images to the descriptor.
-        MultiSetBuilder& addInput(const ImageGroup& imageGroup) {
-            this->addInput(imageGroup.into());
+        /// Add a group of sampled images to the descriptor.
+        MultiSetBuilder& addSampledImage(const ImageGroup& imageGroup) {
+            this->addSampledImage(imageGroup.into());
             return *this;
         }
-        /// Add a subgroup of input images to the descriptor.
-        MultiSetBuilder& addInput(const ImageGroup& imageGroup, size_t start, size_t length) {
-            this->addInput(imageGroup.subGroup(start, length));
+        /// Add a subgroup of sampled images to the descriptor.
+        MultiSetBuilder& addSampledImage(const ImageGroup& imageGroup, size_t start, size_t length) {
+            this->addSampledImage(imageGroup.subGroup(start, length));
             return *this;
         }
 
         /// Add all mipmapped images to the descriptor.
-        MultiSetBuilder& addInput(const Helper::MipmappedImage& mipmappedImage) {
-            this->addInput(mipmappedImage.into());
+        MultiSetBuilder& addSampledImage(const Helper::MipmappedImage& mipmappedImage) {
+            this->addSampledImage(mipmappedImage.into());
             return *this;
         }
 
-        /// Add an output image to the descriptor.
-        MultiSetBuilder& addOutput(const Core::Image& image) {
+        /// Add a storage image to the descriptor.
+        MultiSetBuilder& addStorageImage(const Core::Image& image) {
             for (auto& recipe : this->recipes)
-                recipe.outImages.push_back(image);
+                recipe.storage.push_back(image);
             return *this;
         }
-        /// Add multiple output images to the descriptor.
-        MultiSetBuilder& addOutput(const std::vector<Core::Image>& images) {
+        /// Add multiple storage images to the descriptor.
+        MultiSetBuilder& addStorageImage(const std::vector<Core::Image>& images) {
             for (auto& recipe : this->recipes)
                 for (const auto& img : images)
-                    recipe.outImages.push_back(img);
+                    recipe.storage.push_back(img);
             return *this;
         }
 
-        /// Add a temporal output image to the descriptor.
-        MultiSetBuilder& addOutput(const TemporalImage& temporalImage, size_t offset = 0) {
+        /// Add a temporal storage image to the descriptor.
+        MultiSetBuilder& addStorageImage(const TemporalImage& temporalImage, size_t offset = 0) {
             for (auto& recipe : this->recipes)
-                recipe.outImages.push_back(temporalImage.at(offset++));
+                recipe.storage.push_back(temporalImage.at(offset++));
             return *this;
         }
 
-        /// Add a group of output images to the descriptor.
-        MultiSetBuilder& addOutput(const ImageGroup& imageGroup) {
-            this->addOutput(imageGroup.into());
+        /// Add a group of storage images to the descriptor.
+        MultiSetBuilder& addStorageImage(const ImageGroup& imageGroup) {
+            this->addStorageImage(imageGroup.into());
             return *this;
         }
-        /// Add a subgroup of output images to the descriptor.
-        MultiSetBuilder& addOutput(const ImageGroup& imageGroup, size_t start, size_t length) {
-            this->addOutput(imageGroup.subGroup(start, length));
+        /// Add a subgroup of storage images to the descriptor.
+        MultiSetBuilder& addStorageImage(const ImageGroup& imageGroup, size_t start, size_t length) {
+            this->addStorageImage(imageGroup.subGroup(start, length));
             return *this;
         }
 
         /// Add all mipmapped images to the descriptor.
-        MultiSetBuilder& addOutput(const Helper::MipmappedImage& mipmappedImage) {
-            this->addOutput(mipmappedImage.into());
+        MultiSetBuilder& addStorageImage(const Helper::MipmappedImage& mipmappedImage) {
+            this->addStorageImage(mipmappedImage.into());
             return *this;
         }
 
@@ -186,8 +186,8 @@ namespace VK::Helper {
         std::optional<Core::Buffer> buffer;
         std::vector<Core::Sampler> samplers;
         struct SetRecipe {
-            std::vector<std::optional<Core::Image>> inImages;
-            std::vector<Core::Image> outImages;
+            std::vector<std::optional<Core::Image>> sampled;
+            std::vector<Core::Image> storage;
         };
         std::vector<SetRecipe> recipes;
     };

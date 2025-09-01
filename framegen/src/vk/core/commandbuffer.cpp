@@ -78,23 +78,24 @@ void CommandBuffer::bindDescriptorSet(const Pipeline& pipeline, const Descriptor
 }
 
 void CommandBuffer::insertBarrier(
-        const std::vector<VkImage>& images) const {
+        const std::vector<Core::Image>& images) const {
     if (*this->state != CommandBufferState::Recording)
         throw std::logic_error("Command buffer is not in Recording state");
 
-    std::vector<VkImageMemoryBarrier2> barriers(images.size());
-    for (size_t i = 0; i < images.size(); i++) {
-        barriers[i] = {
+    std::vector<VkImageMemoryBarrier2> barriers;
+    barriers.reserve(images.size());
+    for (const auto& image : images) {
+        barriers.push_back({
             .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
             .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
             .newLayout = VK_IMAGE_LAYOUT_GENERAL,
-            .image = images[i],
+            .image = image.handle(),
             .subresourceRange = {
                 .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
                 .levelCount = 1,
                 .layerCount = 1
             }
-        };
+        });
     }
 
     const VkDependencyInfo dependencyInfo = {
@@ -106,8 +107,8 @@ void CommandBuffer::insertBarrier(
 }
 
 void CommandBuffer::insertBarrier(
-        const std::vector<std::optional<Core::Image>>& readableImages,
-        const std::vector<Core::Image>& writableImages) const {
+        const std::vector<std::optional<Core::Image>>& sampledImages,
+        const std::vector<Core::Image>& storageImages) const {
     if (*this->state != CommandBufferState::Recording)
         throw std::logic_error("Command buffer is not in Recording state");
 
@@ -123,11 +124,11 @@ void CommandBuffer::insertBarrier(
         }
     };
 
-    const size_t totalImages = readableImages.size() + writableImages.size();
+    const size_t totalImages = sampledImages.size() + storageImages.size();
     std::vector<VkImageMemoryBarrier2> barriers;
     barriers.reserve(totalImages);
 
-    for (const auto& image : readableImages) {
+    for (const auto& image : sampledImages) {
         if (!image.has_value())
             continue;
         VkImageMemoryBarrier2& barrier = barriers.emplace_back(dummyBarrier);
@@ -136,7 +137,7 @@ void CommandBuffer::insertBarrier(
         barrier.image = image->handle();
     }
 
-    for (const auto& image : writableImages) {
+    for (const auto& image : storageImages) {
         VkImageMemoryBarrier2& barrier = barriers.emplace_back(dummyBarrier);
         barrier.srcAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
         barrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
@@ -215,8 +216,10 @@ void CommandBuffer::submit(const Device& device, std::optional<Fence> fence,
         throw std::logic_error("Command buffer is not in Full state");
 
     // create wait semaphores and values
-    std::vector<VkSemaphore> waitSemaphores(waitTimelines.size() + wait.size());
-    std::vector<uint64_t> waitSemaphoreValues(waitTimelines.size() + wait.size());
+    std::vector<VkSemaphore> waitSemaphores;
+    waitSemaphores.reserve(waitTimelines.size() + wait.size());
+    std::vector<uint64_t> waitSemaphoreValues;
+    waitSemaphoreValues.reserve(waitTimelines.size() + wait.size());
     for (const auto& entry : waitTimelines) {
         waitSemaphores.push_back(entry.first.handle());
         waitSemaphoreValues.push_back(entry.second);
@@ -225,8 +228,10 @@ void CommandBuffer::submit(const Device& device, std::optional<Fence> fence,
         waitSemaphores.push_back(semaphore.handle());
 
     // create signal semaphores and values
-    std::vector<VkSemaphore> signalSemaphores(signalTimelines.size() + signal.size());
-    std::vector<uint64_t> signalSemaphoreValues(signalTimelines.size() + signal.size());
+    std::vector<VkSemaphore> signalSemaphores;
+    signalSemaphores.reserve(signalTimelines.size() + signal.size());
+    std::vector<uint64_t> signalSemaphoreValues;
+    signalSemaphoreValues.reserve(signalTimelines.size() + signal.size());
     for (const auto& entry : signalTimelines) {
         signalSemaphores.push_back(entry.first.handle());
         signalSemaphoreValues.push_back(entry.second);

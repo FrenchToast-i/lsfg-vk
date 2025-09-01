@@ -17,9 +17,9 @@ MultiSet MultiSetBuilder::build(
     for (const auto& recipe : this->recipes)
         multiset.sets.push_back({
             .sets = Core::DescriptorSet(device, pool, shader,
-                recipe.inImages, recipe.outImages, this->samplers, this->buffer),
-            .readables = recipe.inImages,
-            .writables = recipe.outImages
+                recipe.sampled, recipe.storage, this->samplers, this->buffer),
+            .sampled = recipe.sampled,
+            .storage = recipe.storage
         });
 
     return multiset;
