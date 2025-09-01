@@ -97,8 +97,25 @@ namespace VK::Core {
             const std::vector<VkImage>& readableImages,
             const std::vector<VkImage>& writableImages) const;
 
-        // TODO: Method for copying a buffer to an image
-        // TODO: Method for clearing an image to a color
+        ///
+        /// Copy a buffer to an image.
+        ///
+        /// @param buffer Vulkan buffer
+        /// @param image Vulkan image
+        ///
+        /// @throws std::logic_error if the command buffer is not in Recording state
+        ///
+        void copyBufferToImage(const Buffer& buffer, const Image& image) const;
+
+        ///
+        /// Clear an image to a color.
+        ///
+        /// @param image Vulkan image
+        /// @param white If true, clear to white; otherwise, clear to black
+        ///
+        /// @throws std::logic_error if the command buffer is not in Recording state
+        ///
+        void clearImage(const Image& image, bool white) const;
 
         ///
         /// Dispatch a compute command.

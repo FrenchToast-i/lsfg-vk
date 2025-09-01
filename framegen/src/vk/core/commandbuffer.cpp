@@ -6,8 +6,10 @@
 #include "vk/core/commandpool.hpp"
 #include "vk/core/semaphore.hpp"
 #include "vk/core/pipeline.hpp"
+#include "vk/core/buffer.hpp"
 #include "vk/core/device.hpp"
 #include "vk/core/fence.hpp"
+#include "vk/core/image.hpp"
 #include "vk/exception.hpp"
 
 #include <stdexcept>
@@ -145,6 +147,42 @@ void CommandBuffer::insertBarrier(
         .pImageMemoryBarriers = barriers.data()
     };
     vkCmdPipelineBarrier2(*this->commandBuffer, &dependencyInfo);
+}
+
+void CommandBuffer::copyBufferToImage(const Buffer& buffer, const Image& image) const {
+    if (*this->state != CommandBufferState::Recording)
+        throw std::logic_error("Command buffer is not in Recording state");
+
+    const auto extent = image.getExtent();
+    const VkBufferImageCopy region{
+        .imageSubresource = {
+            .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .layerCount = 1
+        },
+        .imageExtent = { extent.width, extent.height, 1 }
+    };
+    vkCmdCopyBufferToImage(
+        *this->commandBuffer,
+        buffer.handle(), image.handle(),
+        VK_IMAGE_LAYOUT_GENERAL, 1, &region
+    );
+}
+
+void CommandBuffer::clearImage(const Image& image, bool white) const {
+    if (*this->state != CommandBufferState::Recording)
+        throw std::logic_error("Command buffer is not in Recording state");
+
+    const float clearValue = white ? 1.0F : 0.0F;
+    const VkClearColorValue clearColor = {{ clearValue, clearValue, clearValue, clearValue }};
+    const VkImageSubresourceRange subresourceRange = {
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .levelCount = 1,
+        .layerCount = 1
+    };
+    vkCmdClearColorImage(*this->commandBuffer,
+        image.handle(), VK_IMAGE_LAYOUT_GENERAL,
+        &clearColor,
+        1, &subresourceRange);
 }
 
 void CommandBuffer::dispatch(uint32_t x, uint32_t y, uint32_t z) const {
