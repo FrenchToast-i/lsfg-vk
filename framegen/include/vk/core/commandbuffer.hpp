@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vk/core/commandpool.hpp"
+#include "vk/core/descriptorset.hpp"
 #include "vk/core/semaphore.hpp"
 #include "vk/core/pipeline.hpp"
 #include "vk/core/device.hpp"
@@ -65,8 +66,16 @@ namespace VK::Core {
         ///
         void bindPipeline(const Pipeline& pipeline) const;
 
-        // TODO: Method for binding a descriptor set.
-        //   TODO: Rework abstraction for descriptor sets.
+        ///
+        /// Bind a descriptor set to the command buffer.
+        ///
+        /// @param pipeline Vulkan compute pipeline
+        /// @param set Vulkan descriptor set
+        ///
+        /// @throws std::logic_error if the command buffer is not in Recording state
+        ///
+        void bindDescriptorSet(const Pipeline& pipeline, const DescriptorSet& set) const;
+
         // TODO: Method for inserting a pipeline barrier.
         //   TODO: Rework abstraction for barriers.
         // TODO: Method for copying a buffer to an image

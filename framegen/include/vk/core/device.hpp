@@ -20,6 +20,8 @@ namespace VK::Core {
     ///
     class Device {
     public:
+        Device() noexcept = default;
+
         ///
         /// Create the device.
         ///

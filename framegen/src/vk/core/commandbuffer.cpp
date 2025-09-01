@@ -62,6 +62,16 @@ void CommandBuffer::bindPipeline(const Pipeline& pipeline) const {
     vkCmdBindPipeline(*this->commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.handle());
 }
 
+void CommandBuffer::bindDescriptorSet(const Pipeline& pipeline, const DescriptorSet& set) const {
+    if (*this->state != CommandBufferState::Recording)
+        throw std::logic_error("Command buffer is not in Recording state");
+
+    VkDescriptorSet descriptorSetHandle = set.handle();
+    vkCmdBindDescriptorSets(*this->commandBuffer,
+        VK_PIPELINE_BIND_POINT_COMPUTE, pipeline.getLayout(),
+        0, 1, &descriptorSetHandle, 0, nullptr);
+}
+
 void CommandBuffer::dispatch(uint32_t x, uint32_t y, uint32_t z) const {
     if (*this->state != CommandBufferState::Recording)
         throw std::logic_error("Command buffer is not in Recording state");
