@@ -7,14 +7,16 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <utility>
 #include <vector>
 #include <memory>
 
 using namespace VK::Core;
 
 ShaderModule::ShaderModule(const Device& device, const std::vector<uint8_t>& code,
-        const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes) {
+        size_t sampledImages,
+        size_t storageImages,
+        size_t buffers,
+        size_t samplers) {
     // create shader module
     const uint8_t* data_ptr = code.data();
     const VkShaderModuleCreateInfo createInfo{
@@ -29,39 +31,39 @@ ShaderModule::ShaderModule(const Device& device, const std::vector<uint8_t>& cod
 
     // create descriptor set layout
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-    size_t bufferIdx{0};
-    size_t samplerIdx{16};
-    size_t inputIdx{32};
-    size_t outputIdx{48};
-    for (const auto &[count, type] : descriptorTypes)
-        for (size_t i = 0; i < count; i++) {
-            size_t* bindIdx{};
-            switch (type) {
-                case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-                    bindIdx = &bufferIdx;
-                    break;
-                case VK_DESCRIPTOR_TYPE_SAMPLER:
-                    bindIdx = &samplerIdx;
-                    break;
-                case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-                    bindIdx = &inputIdx;
-                    break;
-                case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
-                    bindIdx = &outputIdx;
-                    break;
-                default:
-                    throw VK::vulkan_error(VK_ERROR_UNKNOWN, "Unsupported descriptor type");
-            }
+    layoutBindings.reserve(buffers + samplers + sampledImages + storageImages);
 
-            layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
-                .binding = static_cast<uint32_t>(*bindIdx),
-                .descriptorType = type,
-                .descriptorCount = 1,
-                .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
-            });
+    for (size_t i = 0; i < buffers; i++)
+        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+            .binding = static_cast<uint32_t>(i),
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
+        });
 
-            (*bindIdx)++;
-        }
+    for (size_t i = 0; i < samplers; i++)
+        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+            .binding = static_cast<uint32_t>(i + 16),
+            .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
+        });
+
+    for (size_t i = 0; i < sampledImages; i++)
+        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+            .binding = static_cast<uint32_t>(i + 32),
+            .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
+        });
+
+    for (size_t i = 0; i < storageImages; i++)
+        layoutBindings.emplace_back(VkDescriptorSetLayoutBinding {
+            .binding = static_cast<uint32_t>(i + 48),
+            .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_COMPUTE_BIT
+        });
 
     const VkDescriptorSetLayoutCreateInfo layoutDesc{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,

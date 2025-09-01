@@ -6,7 +6,6 @@
 
 #include <cstdint>
 #include <cstddef>
-#include <utility>
 #include <vector>
 #include <memory>
 
@@ -26,12 +25,18 @@ namespace VK::Core {
         ///
         /// @param device Vulkan device
         /// @param code SPIR-V bytecode for the shader.
-        /// @param descriptorTypes Descriptor types used in the shader.
+        /// @param sampledImages Number of sampled images in the shader.
+        /// @param storageImages Number of storage images in the shader.
+        /// @param buffers Number of uniform/storage buffers in the shader.
+        /// @param samplers Number of samplers in the shader.
         ///
         /// @throws VK::vulkan_error if object creation fails.
         ///
         ShaderModule(const Device& device, const std::vector<uint8_t>& code,
-            const std::vector<std::pair<size_t, VkDescriptorType>>& descriptorTypes);
+            size_t sampledImages,
+            size_t storageImages,
+            size_t buffers,
+            size_t samplers);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->shaderModule; }

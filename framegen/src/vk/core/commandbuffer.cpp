@@ -106,8 +106,8 @@ void CommandBuffer::insertBarrier(
 }
 
 void CommandBuffer::insertBarrier(
-        const std::vector<VkImage>& readableImages,
-        const std::vector<VkImage>& writableImages) const {
+        const std::vector<std::optional<Core::Image>>& readableImages,
+        const std::vector<Core::Image>& writableImages) const {
     if (*this->state != CommandBufferState::Recording)
         throw std::logic_error("Command buffer is not in Recording state");
 
@@ -123,22 +123,24 @@ void CommandBuffer::insertBarrier(
         }
     };
 
-    const size_t totalImages =
-        readableImages.size() + writableImages.size();
-    std::vector<VkImageMemoryBarrier2> barriers(totalImages);
+    const size_t totalImages = readableImages.size() + writableImages.size();
+    std::vector<VkImageMemoryBarrier2> barriers;
+    barriers.reserve(totalImages);
 
     for (const auto& image : readableImages) {
+        if (!image.has_value())
+            continue;
         VkImageMemoryBarrier2& barrier = barriers.emplace_back(dummyBarrier);
         barrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
-        barrier.image = image;
+        barrier.image = image->handle();
     }
 
     for (const auto& image : writableImages) {
         VkImageMemoryBarrier2& barrier = barriers.emplace_back(dummyBarrier);
         barrier.srcAccessMask = VK_ACCESS_2_SHADER_READ_BIT;
         barrier.dstAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
-        barrier.image = image;
+        barrier.image = image.handle();
     }
 
     // insert barriers

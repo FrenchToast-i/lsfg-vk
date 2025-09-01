@@ -4,9 +4,13 @@
 #include "vk/core/descriptorpool.hpp"
 #include "vk/core/descriptorset.hpp"
 #include "vk/core/shadermodule.hpp"
+#include "vk/core/sampler.hpp"
+#include "vk/core/buffer.hpp"
 #include "vk/core/device.hpp"
+#include "vk/core/image.hpp"
 #include "vk/exception.hpp"
 
+#include <optional>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -16,10 +20,10 @@ using namespace VK::Core;
 
 DescriptorSet::DescriptorSet(const Device& device,
         const DescriptorPool& pool, const ShaderModule& shaderModule,
-        const std::vector<ImageInfo>& sampledImages,
-        const std::vector<ImageInfo>& storageImages,
-        const std::vector<SamplerInfo>& samplers,
-        const std::vector<BufferInfo>& uniformBuffers) {
+        const std::vector<std::optional<Core::Image>>& sampledImages,
+        const std::vector<Core::Image>& storageImages,
+        const std::vector<Core::Sampler>& samplers,
+        const std::optional<Core::Buffer>& buffer) {
     // create descriptor set
     VkDescriptorSetLayout layout = shaderModule.getLayout();
     const VkDescriptorSetAllocateInfo desc{
@@ -33,21 +37,29 @@ DescriptorSet::DescriptorSet(const Device& device,
     if (res != VK_SUCCESS || descriptorSetHandle == VK_NULL_HANDLE)
         throw VK::vulkan_error(res, "Unable to allocate descriptor set");
 
-    // create descriptor writes
-    const size_t totalEntries =
-        storageImages.size() + samplers.size() + uniformBuffers.size() + sampledImages.size();
-    std::vector<VkWriteDescriptorSet> entries(totalEntries);
+    const size_t bindingCount = samplers.size() + sampledImages.size()
+        + storageImages.size() + (buffer.has_value() ? 1 : 0);
 
-    size_t bufferIdx{0};
-    for (const auto& buf : uniformBuffers)
+    // create descriptor writes
+    std::vector<VkWriteDescriptorSet> entries;
+    entries.reserve(bindingCount);
+
+    std::optional<VkDescriptorBufferInfo> bufferInfos;
+
+    if (buffer.has_value())
         entries.push_back({
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = descriptorSetHandle,
-            .dstBinding = static_cast<uint32_t>(bufferIdx++),
             .descriptorCount = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .pBufferInfo = buf.handle()
+            .pBufferInfo = &(bufferInfos = VkDescriptorBufferInfo{
+                .buffer = buffer->handle(),
+                .range = buffer->getSize()
+            }).value()
         });
+
+    std::vector<VkDescriptorImageInfo> imageInfos;
+    imageInfos.reserve(bindingCount);
 
     size_t samplerIdx{16};
     for (const auto& samp : samplers)
@@ -57,19 +69,26 @@ DescriptorSet::DescriptorSet(const Device& device,
             .dstBinding = static_cast<uint32_t>(samplerIdx++),
             .descriptorCount = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
-            .pImageInfo = samp.handle()
+            .pImageInfo = &(imageInfos.emplace_back(VkDescriptorImageInfo{
+                .sampler = samp.handle(),
+            }))
         });
 
     size_t inputIdx{32};
-    for (const auto& img : sampledImages)
+    for (const auto& img : sampledImages) {
         entries.push_back({
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = descriptorSetHandle,
             .dstBinding = static_cast<uint32_t>(inputIdx++),
             .descriptorCount = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
-            .pImageInfo = img.handle()
+            .pImageInfo = &(imageInfos.emplace_back(VkDescriptorImageInfo{
+                .imageView = img.has_value() ? img->getView() : nullptr,
+                .imageLayout = img.has_value() ?
+                    VK_IMAGE_LAYOUT_GENERAL : VK_IMAGE_LAYOUT_UNDEFINED
+            }))
         });
+    }
 
     size_t outputIdx{48};
     for (const auto& img : storageImages)
@@ -79,7 +98,10 @@ DescriptorSet::DescriptorSet(const Device& device,
             .dstBinding = static_cast<uint32_t>(outputIdx++),
             .descriptorCount = 1,
             .descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-            .pImageInfo = img.handle()
+            .pImageInfo = &(imageInfos.emplace_back(VkDescriptorImageInfo{
+                .imageView = img.getView(),
+                .imageLayout = VK_IMAGE_LAYOUT_GENERAL
+            }))
         });
 
     // update descriptor set

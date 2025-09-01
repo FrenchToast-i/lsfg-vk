@@ -94,8 +94,8 @@ namespace VK::Core {
         /// @throws std::logic_error if the command buffer is not in Recording state
         ///
         void insertBarrier(
-            const std::vector<VkImage>& readableImages,
-            const std::vector<VkImage>& writableImages) const;
+            const std::vector<std::optional<Core::Image>>& readableImages,
+            const std::vector<Core::Image>& writableImages) const;
 
         ///
         /// Copy a buffer to an image.

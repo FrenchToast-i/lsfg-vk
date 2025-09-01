@@ -14,52 +14,6 @@
 
 namespace VK::Core {
 
-    /// Helper class to wrap VkDescriptorImageInfo
-    class ImageInfo {
-    public:
-        ImageInfo() noexcept = default; // skipping images is allowed
-
-        ImageInfo(const Image& image) noexcept
-            : info{
-                .imageView = image.getView(),
-                .imageLayout = VK_IMAGE_LAYOUT_GENERAL
-            } {}
-
-        /// Get the Vulkan handle.
-        [[nodiscard]] auto handle() const { return &this->info; }
-    private:
-        VkDescriptorImageInfo info{};
-    };
-
-    /// Helper class to wrap VkDescriptorImageInfo for samplers
-    class SamplerInfo {
-    public:
-        SamplerInfo(const Sampler& sampler) noexcept
-            : info{
-                .sampler = sampler.handle(),
-            } {}
-
-        /// Get the Vulkan handle.
-        [[nodiscard]] auto handle() const { return &this->info; }
-    private:
-        VkDescriptorImageInfo info{};
-    };
-
-    /// Helper class to wrap VkDescriptorBufferInfo
-    class BufferInfo {
-    public:
-        BufferInfo(const Buffer& buffer) noexcept
-            : info{
-                .buffer = buffer.handle(),
-                .range = buffer.getSize()
-            } {}
-
-        /// Get the Vulkan handle.
-        [[nodiscard]] auto handle() const { return &this->info; }
-    private:
-        VkDescriptorBufferInfo info{};
-    };
-
     ///
     /// C++ wrapper class for a Vulkan descriptor set.
     ///
@@ -74,16 +28,20 @@ namespace VK::Core {
         ///
         /// @param device Vulkan device
         /// @param pool Descriptor pool to allocate from
-        /// @param shaderModule Shader module to use for the descriptor set
+        /// @param shaderModule Shader module this descriptor is for
+        /// @param sampledImages Sampled images to bind
+        /// @param storageImages Storage images to bind
+        /// @param samplers Samplers to bind
+        /// @param buffer Buffer to bind
         ///
         /// @throws VK::vulkan_error if object creation fails.
         ///
         DescriptorSet(const Device& device,
             const DescriptorPool& pool, const ShaderModule& shaderModule,
-            const std::vector<ImageInfo>& sampledImages,
-            const std::vector<ImageInfo>& storageImages,
-            const std::vector<SamplerInfo>& samplers,
-            const std::vector<BufferInfo>& uniformBuffers);
+            const std::vector<std::optional<Core::Image>>& sampledImages,
+            const std::vector<Core::Image>& storageImages,
+            const std::vector<Core::Sampler>& samplers,
+            const std::optional<Core::Buffer>& buffer);
 
         /// Get the Vulkan handle.
         [[nodiscard]] auto handle() const { return *this->descriptorSet; }
