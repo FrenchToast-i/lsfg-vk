@@ -15,8 +15,6 @@ namespace VK::Core {
     ///
     class DescriptorPool {
     public:
-        DescriptorPool() noexcept = default;
-
         ///
         /// Create the descriptor pool.
         ///

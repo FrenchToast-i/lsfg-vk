@@ -15,8 +15,6 @@ namespace VK::Core {
     ///
     class Sampler {
     public:
-        Sampler() noexcept = default;
-
         ///
         /// Create the sampler.
         ///

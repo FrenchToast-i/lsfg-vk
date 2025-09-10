@@ -16,8 +16,6 @@ namespace VK::Core {
     ///
     class Fence {
     public:
-        Fence() noexcept = default;
-
         ///
         /// Create the fence.
         ///

@@ -16,8 +16,6 @@ namespace VK::Core {
     ///
     class Semaphore {
     public:
-        Semaphore() noexcept = default;
-
         ///
         /// Create/Import a semaphore.
         ///

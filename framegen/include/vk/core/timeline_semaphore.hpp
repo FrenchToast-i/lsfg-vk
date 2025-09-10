@@ -16,8 +16,6 @@ namespace VK::Core {
     ///
     class TimelineSemaphore {
     public:
-        TimelineSemaphore() noexcept = default;
-
         ///
         /// Create the timeline semaphore.
         ///

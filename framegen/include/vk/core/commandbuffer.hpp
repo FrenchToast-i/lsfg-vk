@@ -37,8 +37,6 @@ namespace VK::Core {
     ///
     class CommandBuffer {
     public:
-        CommandBuffer() noexcept = default;
-
         ///
         /// Create the command buffer.
         ///

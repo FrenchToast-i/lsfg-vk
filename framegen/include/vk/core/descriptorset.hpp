@@ -21,8 +21,6 @@ namespace VK::Core {
     ///
     class DescriptorSet {
     public:
-        DescriptorSet() noexcept = default;
-
         ///
         /// Create the descriptor set.
         ///

@@ -18,8 +18,6 @@ namespace VK::Core {
     ///
     class ShaderModule {
     public:
-        ShaderModule() noexcept = default;
-
         ///
         /// Create the shader module.
         ///

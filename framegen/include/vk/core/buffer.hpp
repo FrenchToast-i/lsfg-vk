@@ -16,8 +16,6 @@ namespace VK::Core {
     ///
     class Buffer {
     public:
-        Buffer() noexcept = default;
-
         ///
         /// Create the buffer.
         ///

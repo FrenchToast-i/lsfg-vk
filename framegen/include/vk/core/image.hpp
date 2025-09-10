@@ -16,8 +16,6 @@ namespace VK::Core {
     ///
     class Image {
     public:
-        Image() noexcept = default;
-
         ///
         /// Create the image.
         ///
