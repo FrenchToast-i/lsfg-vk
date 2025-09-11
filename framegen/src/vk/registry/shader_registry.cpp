@@ -1,11 +1,12 @@
 #include "vk/registry/shader_registry.hpp"
 
 #include <stdexcept>
+#include <string>
 
 using namespace VK::Registry;
 
 void ShaderRegistry::registerModule(const std::string& name, const ShaderModuleInfo& info) {
-    if (modules.find(name) != modules.end()) {
+    if (modules.contains(name)) {
         throw std::logic_error("Shader module with name '" + name + "' already exists.");
     }
 

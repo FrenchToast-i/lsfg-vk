@@ -15,7 +15,8 @@ project(lsfg-vk-framegen
 
 file(GLOB SOURCES
     "src/vk/core/*.cpp"
-    "src/vk/helper/*.cpp"
+    "src/vk/pool/*.cpp"
+    "src/vk/registry/*.cpp"
     "src/vk/*.cpp"
     "src/*.cpp"
     "src/thirdparty/*.c"

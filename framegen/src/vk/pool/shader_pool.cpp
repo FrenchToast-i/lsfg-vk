@@ -2,6 +2,10 @@
 #include "vk/registry/shader_registry.hpp"
 #include "vk/core/shadermodule.hpp"
 #include "vk/core/pipeline.hpp"
+#include "vk/core/device.hpp"
+
+#include <utility>
+#include <string>
 
 using namespace VK::Pool;
 
