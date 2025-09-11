@@ -11,6 +11,9 @@
 
 namespace VK::Core {
 
+    // FIXME: The toggle for fp32 shouldn't be implemented here.
+    // FIXME: Device UUID needs an overhaul.
+
     ///
     /// C++ wrapper class for a Vulkan device.
     ///
